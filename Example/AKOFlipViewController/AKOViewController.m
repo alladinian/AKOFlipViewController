@@ -7,6 +7,7 @@
 //
 
 #import "AKOViewController.h"
+#import "AKODetailViewController.h"
 
 @interface AKOViewController ()
 
@@ -24,6 +25,18 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (NSUInteger)numberOfControllersInFlipController:(AKOFlipViewController *)flipController
+{
+    return 5;
+}
+
+- (UIViewController *)flipViewController:(AKOFlipViewController *)flipViewController viewControllerAtIndex:(NSUInteger)index
+{
+    AKODetailViewController *detailController = [self.storyboard instantiateViewControllerWithIdentifier:@"DetailViewController"];
+    detailController.image = [UIImage imageNamed:[[@(index) stringValue] stringByAppendingString:@".jpg"]];
+    return detailController;
 }
 
 @end

@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <AKOFlipViewController/AKOFlipViewController.h>
 
-@interface AKOViewController : UIViewController
+@interface AKOViewController : AKOFlipViewController
 
 @end
