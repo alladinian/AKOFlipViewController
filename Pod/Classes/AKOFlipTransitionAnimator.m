@@ -11,21 +11,37 @@
 - (UIView *)rightHalf;
 - (UIView *)topHalf;
 - (UIView *)bottomHalf;
+- (UIView *)shadowView;
 @end
 @implementation UIView (AKOFlipSplitting)
 - (UIView *)leftHalf
 {
-    return nil;
+    CGRect snapRect = CGRectMake(0, 0, CGRectGetMidX(self.bounds), self.frame.size.height);
+    UIView *snapshot = [self resizableSnapshotViewFromRect:snapRect afterScreenUpdates:NO withCapInsets:UIEdgeInsetsZero];
+    
+    [snapshot addShadowView];
+    
+    snapshot.userInteractionEnabled = NO;
+    return snapshot;
 }
 
 - (UIView *)rightHalf
 {
-    return nil;
+    CGRect snapRect = CGRectMake(CGRectGetMidX(self.bounds), 0, CGRectGetMidX(self.bounds), self.frame.size.height);
+    UIView *snapshot = [self resizableSnapshotViewFromRect:snapRect afterScreenUpdates:NO withCapInsets:UIEdgeInsetsZero];
+    
+    [snapshot addShadowView];
+    
+    CGRect newFrame = CGRectOffset(snapshot.frame, snapshot.bounds.size.width, 0);
+    snapshot.frame = newFrame;
+    
+    snapshot.userInteractionEnabled = NO;
+    return snapshot;
 }
 
 - (UIView *)topHalf
 {
-    CGRect snapRect = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height / 2.0f);
+    CGRect snapRect = CGRectMake(0, 0, self.frame.size.width, CGRectGetMidY(self.bounds));
     UIView *snapshot = [self resizableSnapshotViewFromRect:snapRect afterScreenUpdates:NO withCapInsets:UIEdgeInsetsZero];
     
     [snapshot addShadowView];
@@ -36,7 +52,7 @@
 
 - (UIView *)bottomHalf
 {
-    CGRect snapRect = CGRectMake(0, CGRectGetMidY(self.frame), self.frame.size.width, self.frame.size.height / 2.0f);
+    CGRect snapRect = CGRectMake(0, CGRectGetMidY(self.bounds), self.frame.size.width, CGRectGetMidY(self.bounds));
     UIView *snapshot = [self resizableSnapshotViewFromRect:snapRect afterScreenUpdates:NO withCapInsets:UIEdgeInsetsZero];
     
     [snapshot addShadowView];
@@ -55,6 +71,11 @@
     shadowView.alpha = 0.0f;
     shadowView.tag = 999;
     [self addSubview:shadowView];
+}
+
+- (UIView *)shadowView
+{
+    return [self viewWithTag:999];
 }
 @end
 
@@ -84,7 +105,11 @@ const CGFloat perspectiveDepth = (1.0f / -2000.0f);
     CATransform3D t = CATransform3DIdentity;
     //Add the perspective!!!
     t.m34 = perspectiveDepth;
-    t = CATransform3DRotate(t, angle, 1, 0, 0);
+    if (self.transitionDirection == AKOFlipTransitionDirectionVertical) {
+        t = CATransform3DRotate(t, angle, 1, 0, 0);
+    } else {
+        t = CATransform3DRotate(t, angle, 0, 1, 0);
+    }
     return t;
 }
 
@@ -98,70 +123,63 @@ CGFloat RadiansToDegrees(CGFloat radians)
     return radians * 180 / M_PI;
 }
 
-- (UIView *)shadowViewForView:(UIView *)view
-{
-    return [view viewWithTag:999];
-}
-
 - (void)animateTransition:(id<UIViewControllerContextTransitioning>)transitionContext
 {
+    
+    BOOL isVertical = (self.transitionDirection == AKOFlipTransitionDirectionVertical);
     
     UIViewController *sourceVC = [transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
     UIViewController *destinationVC = [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
     
+    UIView *containerView = [transitionContext containerView];
     
     UIView *sourceView = sourceVC.view;
     UIView *destinationView = destinationVC.view;
     
     UIView *sourceSnapshot = [sourceView snapshotViewAfterScreenUpdates:NO];
-    
-    UIView *containerView = [transitionContext containerView];
-    
     UIView *destinationSnapshot = [destinationView snapshotViewAfterScreenUpdates:YES];
     
     CGFloat w = CGRectGetWidth(sourceSnapshot.frame);
     CGFloat h = CGRectGetHeight(sourceSnapshot.frame) / 2.0f;
     
-    UIView *sourceUpperView = [sourceSnapshot topHalf];
-    UIView *sourceBottomView = [sourceSnapshot bottomHalf];
+    UIView *sourceLeadingView = isVertical ? [sourceSnapshot topHalf] : [sourceSnapshot leftHalf];
+    UIView *sourceTrailingView = isVertical ? [sourceSnapshot bottomHalf] : [sourceSnapshot rightHalf];
     
-    UIView *destinationUpperView = [destinationSnapshot topHalf];
-    UIView *destinationBottomView = [destinationSnapshot bottomHalf];
+    UIView *destinationLeadingView = isVertical ? [destinationSnapshot topHalf] : [destinationSnapshot leftHalf];
+    UIView *destinationTrailingView = isVertical ? [destinationSnapshot bottomHalf] : [destinationSnapshot rightHalf];
+
     
     CGFloat midShadow = 0.2f;
     CGFloat maxShadow = 0.7f;
     
-    [containerView addSubview:sourceUpperView];
-    [containerView addSubview:sourceBottomView];
-    
+    [containerView addSubview:sourceLeadingView];
+    [containerView addSubview:sourceTrailingView];
     
     
     if (self.presenting) {
         // PUSH
         
-        [containerView insertSubview:destinationVC.view belowSubview:sourceUpperView];
+        [containerView insertSubview:destinationVC.view belowSubview:sourceLeadingView];
         
-        [containerView addSubview:destinationUpperView];
-        [containerView insertSubview:destinationBottomView aboveSubview:destinationVC.view];
+        [containerView addSubview:destinationLeadingView];
+        [containerView insertSubview:destinationTrailingView aboveSubview:destinationVC.view];
         
+        sourceTrailingView.layer.anchorPoint = isVertical ? CGPointMake(0.5, 0.0) : CGPointMake(0.0, 0.5);
+        destinationLeadingView.layer.anchorPoint = isVertical ? CGPointMake(0.5, 1.0) : CGPointMake(1.0, 0.5);
+
+         // Make it already halfway rotated
+        destinationLeadingView.layer.transform = isVertical ? CATransform3DMakeRotation(-M_PI/2.0f, 1, 0, 0) : CATransform3DMakeRotation(M_PI/2.0f, 0, 1, 0);
+
+        CGRect newFrame = sourceTrailingView.frame;
+        newFrame.origin = isVertical ? CGPointMake(0, CGRectGetHeight(sourceTrailingView.frame)) : CGPointMake(CGRectGetWidth(sourceTrailingView.frame), 0);
         
-        
-        sourceBottomView.layer.anchorPoint = CGPointMake(0.5, 0.0);
-        destinationUpperView.layer.anchorPoint = CGPointMake(0.5, 1.0);
-        
-        destinationUpperView.layer.transform = CATransform3DMakeRotation(-M_PI/2.0f, 1, 0, 0); // Make it already halfway rotated
-        
-        sourceBottomView.frame = CGRectMake(0, sourceUpperView.frame.size.height,
-                                            sourceBottomView.frame.size.width,
-                                            sourceBottomView.frame.size.height);
-        destinationUpperView.frame = sourceUpperView.frame;
-        
-        
-        [self shadowViewForView:destinationUpperView].alpha = midShadow;
-        [self shadowViewForView:destinationBottomView].alpha = maxShadow;
+        sourceTrailingView.frame = newFrame;
+        destinationLeadingView.frame = sourceLeadingView.frame;
         
         
-        //切れ目がないアニメーション
+        [destinationLeadingView shadowView].alpha = midShadow;
+        [destinationTrailingView shadowView].alpha = maxShadow;
+        
         [UIView animateKeyframesWithDuration:[self transitionDuration:transitionContext]
                                        delay:0
                                      options:0
@@ -170,10 +188,10 @@ CGFloat RadiansToDegrees(CGFloat radians)
                                                               relativeDuration:0.5
                                                                     animations:
                                        ^{
-                                           CGFloat angle = DegreesToRadians(90);
-                                           sourceBottomView.layer.transform = [self makeRotationAndPerspectiveTransform:angle];
-                                           [self shadowViewForView:sourceBottomView].alpha = midShadow;
-                                           [self shadowViewForView:destinationBottomView].alpha = 0;
+                                           CGFloat angle = DegreesToRadians( isVertical ? 90 : -90);
+                                           sourceTrailingView.layer.transform = [self makeRotationAndPerspectiveTransform:angle];
+                                           [sourceTrailingView shadowView].alpha = midShadow;
+                                           [destinationTrailingView shadowView].alpha = 0;
                                        }];
                                       
                                       [UIView addKeyframeWithRelativeStartTime:0.5
@@ -181,16 +199,16 @@ CGFloat RadiansToDegrees(CGFloat radians)
                                                                     animations:
                                        ^{
                                            CGFloat angle = DegreesToRadians(0);
-                                           destinationUpperView.layer.transform = [self makeRotationAndPerspectiveTransform:angle];
-                                           [self shadowViewForView:sourceUpperView].alpha = maxShadow;
-                                           [self shadowViewForView:destinationUpperView].alpha = 0;
+                                           destinationLeadingView.layer.transform = [self makeRotationAndPerspectiveTransform:angle];
+                                           [sourceLeadingView shadowView].alpha = maxShadow;
+                                           [destinationLeadingView shadowView].alpha = 0;
                                        }];
                                   }
                                   completion:^(BOOL finished){
-                                      [sourceBottomView removeFromSuperview];
-                                      [sourceUpperView removeFromSuperview];
-                                      [destinationUpperView removeFromSuperview];
-                                      [destinationBottomView removeFromSuperview];
+                                      [sourceTrailingView removeFromSuperview];
+                                      [sourceLeadingView removeFromSuperview];
+                                      [destinationLeadingView removeFromSuperview];
+                                      [destinationTrailingView removeFromSuperview];
                                       
                                       BOOL completed = ![transitionContext transitionWasCancelled];
                                       [transitionContext completeTransition:completed];
@@ -200,25 +218,25 @@ CGFloat RadiansToDegrees(CGFloat radians)
     }else{
         // POP
         
-        [containerView addSubview:destinationBottomView];
+        [containerView addSubview:destinationTrailingView];
         
-        [destinationBottomView setFrame:CGRectMake(0, h, w, 0)];
+        [destinationTrailingView setFrame:CGRectMake(0, h, w, 0)];
         
-        [containerView insertSubview:destinationVC.view belowSubview:sourceUpperView];
-        [containerView insertSubview:destinationUpperView aboveSubview:destinationVC.view];
-        
-        
-        sourceUpperView.layer.anchorPoint = CGPointMake(0.5, 1.0);
-        destinationBottomView.layer.anchorPoint = CGPointMake(0.5, 0.0);
-        
-        destinationBottomView.layer.transform = CATransform3DMakeRotation(M_PI/2.0f, 1, 0, 0); // Make it already halfway rotated
+        [containerView insertSubview:destinationVC.view belowSubview:sourceLeadingView];
+        [containerView insertSubview:destinationLeadingView aboveSubview:destinationVC.view];
         
         
-        sourceUpperView.frame = CGRectMake(0, 0, sourceUpperView.frame.size.width, sourceUpperView.frame.size.height);
-        destinationBottomView.frame = sourceBottomView.frame;
+        sourceLeadingView.layer.anchorPoint = isVertical ? CGPointMake(0.5, 1.0) : CGPointMake(1.0, 0.5);
+        destinationTrailingView.layer.anchorPoint = isVertical ? CGPointMake(0.5, 0.0) : CGPointMake(0.0, 0.5);
         
-        [self shadowViewForView:destinationUpperView].alpha = maxShadow;
-        [self shadowViewForView:destinationBottomView].alpha = midShadow;
+        // Make it already halfway rotated
+        destinationTrailingView.layer.transform = isVertical ? CATransform3DMakeRotation(M_PI/2.0f, 1, 0, 0) : CATransform3DMakeRotation(-M_PI/2.0f, 0, 1, 0);
+        
+        sourceLeadingView.frame = CGRectMake(0, 0, sourceLeadingView.frame.size.width, sourceLeadingView.frame.size.height);
+        destinationTrailingView.frame = sourceTrailingView.frame;
+        
+        [destinationLeadingView shadowView].alpha = maxShadow;
+        [destinationTrailingView shadowView].alpha = midShadow;
         
         [UIView animateKeyframesWithDuration:[self transitionDuration:transitionContext]
                                        delay:0
@@ -229,10 +247,10 @@ CGFloat RadiansToDegrees(CGFloat radians)
                                                               relativeDuration:0.5
                                                                     animations:
                                        ^{
-                                           CGFloat angle = DegreesToRadians(-90);
-                                           sourceUpperView.layer.transform = [self makeRotationAndPerspectiveTransform:angle];
-                                           [self shadowViewForView:destinationUpperView].alpha = 0;
-                                           [self shadowViewForView:sourceUpperView].alpha = midShadow;
+                                           CGFloat angle = DegreesToRadians(isVertical ? -90 : 90);
+                                           sourceLeadingView.layer.transform = [self makeRotationAndPerspectiveTransform:angle];
+                                           [destinationLeadingView shadowView].alpha = 0;
+                                           [sourceLeadingView shadowView].alpha = midShadow;
                                        }];
                                       
                                       
@@ -241,16 +259,16 @@ CGFloat RadiansToDegrees(CGFloat radians)
                                                                     animations:
                                        ^{
                                            CGFloat angle = DegreesToRadians(0);
-                                           destinationBottomView.layer.transform = [self makeRotationAndPerspectiveTransform:angle];
-                                           [self shadowViewForView:sourceBottomView].alpha = maxShadow;
-                                           [self shadowViewForView:destinationBottomView].alpha = 0;
+                                           destinationTrailingView.layer.transform = [self makeRotationAndPerspectiveTransform:angle];
+                                           [sourceTrailingView shadowView].alpha = maxShadow;
+                                           [destinationTrailingView shadowView].alpha = 0;
                                        }];
                                   }
                                   completion:^(BOOL finished){
-                                      [sourceBottomView removeFromSuperview];
-                                      [sourceUpperView removeFromSuperview];
-                                      [destinationUpperView removeFromSuperview];
-                                      [destinationBottomView removeFromSuperview];
+                                      [sourceTrailingView removeFromSuperview];
+                                      [sourceLeadingView removeFromSuperview];
+                                      [destinationLeadingView removeFromSuperview];
+                                      [destinationTrailingView removeFromSuperview];
                                       
                                       BOOL completed = ![transitionContext transitionWasCancelled];
                                       [transitionContext completeTransition:completed];
@@ -258,8 +276,6 @@ CGFloat RadiansToDegrees(CGFloat radians)
          ];
         
     }
-    
-
 }
 
 @end
