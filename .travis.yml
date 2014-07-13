@@ -1,6 +1,12 @@
 reference: http://www.objc.io/issue-6/travis-ci.html
 language: objective-c
 cache: bundler
+
+before_install:
+  - gem install cocoapods -v '0.33.1'
+  - pod repo remove master
+  - pod setup
+
 script:
 - cd Example
 - pod install
