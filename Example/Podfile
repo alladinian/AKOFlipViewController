@@ -1,0 +1,12 @@
+target 'AKOFlipViewController', :exclusive => true do
+  pod "AKOFlipViewController", :path => "../"
+end
+
+target 'Tests', :exclusive => true do
+  pod "AKOFlipViewController", :path => "../"
+
+  pod 'Specta', '~> 0.2.1'
+  pod 'Expecta'
+  pod 'FBSnapshotTestCase'
+  pod 'EXPMatchers+FBSnapshotTest'
+end
