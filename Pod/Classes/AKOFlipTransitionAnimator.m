@@ -6,6 +6,58 @@
 //
 //
 
+@interface UIView (AKOFlipSplitting)
+- (UIView *)leftHalf;
+- (UIView *)rightHalf;
+- (UIView *)topHalf;
+- (UIView *)bottomHalf;
+@end
+@implementation UIView (AKOFlipSplitting)
+- (UIView *)leftHalf
+{
+    return nil;
+}
+
+- (UIView *)rightHalf
+{
+    return nil;
+}
+
+- (UIView *)topHalf
+{
+    CGRect snapRect = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height / 2.0f);
+    UIView *snapshot = [self resizableSnapshotViewFromRect:snapRect afterScreenUpdates:NO withCapInsets:UIEdgeInsetsZero];
+    
+    [snapshot addShadowView];
+    
+    snapshot.userInteractionEnabled = NO;
+    return snapshot;
+}
+
+- (UIView *)bottomHalf
+{
+    CGRect snapRect = CGRectMake(0, CGRectGetMidY(self.frame), self.frame.size.width, self.frame.size.height / 2.0f);
+    UIView *snapshot = [self resizableSnapshotViewFromRect:snapRect afterScreenUpdates:NO withCapInsets:UIEdgeInsetsZero];
+    
+    [snapshot addShadowView];
+    
+    CGRect newFrame = CGRectOffset(snapshot.frame, 0, snapshot.bounds.size.height);
+    snapshot.frame = newFrame;
+    
+    snapshot.userInteractionEnabled = NO;
+    return snapshot;
+}
+
+- (void)addShadowView
+{
+    UIView *shadowView = [[UIView alloc] initWithFrame:self.bounds];
+    shadowView.backgroundColor = [UIColor blackColor];
+    shadowView.alpha = 0.0f;
+    shadowView.tag = 999;
+    [self addSubview:shadowView];
+}
+@end
+
 const CGFloat perspectiveDepth = (1.0f / -2000.0f);
 
 #import "AKOFlipTransitionAnimator.h"
@@ -51,39 +103,6 @@ CGFloat RadiansToDegrees(CGFloat radians)
     return [view viewWithTag:999];
 }
 
-- (UIView *)createUpperHalf:(UIView *)view
-{
-    CGRect snapRect = CGRectMake(0, 0, view.frame.size.width, view.frame.size.height / 2);
-    UIView *topHalf = [view resizableSnapshotViewFromRect:snapRect afterScreenUpdates:NO withCapInsets:UIEdgeInsetsZero];
-    
-    UIView *shadowView = [[UIView alloc] initWithFrame:topHalf.bounds];
-    shadowView.backgroundColor = [UIColor blackColor];
-    shadowView.alpha = 0.0f;
-    shadowView.tag = 999;
-    [topHalf addSubview:shadowView];
-    
-    topHalf.userInteractionEnabled = NO;
-    return topHalf;
-}
-
-- (UIView *)createBottomHalf:(UIView *)view
-{
-    CGRect snapRect = CGRectMake(0, CGRectGetMidY(view.frame), view.frame.size.width, view.frame.size.height / 2);
-    UIView *bottomHalf = [view resizableSnapshotViewFromRect:snapRect afterScreenUpdates:NO withCapInsets:UIEdgeInsetsZero];
-    
-    UIView *shadowView = [[UIView alloc] initWithFrame:bottomHalf.bounds];
-    shadowView.backgroundColor = [UIColor blackColor];
-    shadowView.alpha = 0.0f;
-    shadowView.tag = 999;
-    [bottomHalf addSubview:shadowView];
-    
-    CGRect newFrame = CGRectOffset(bottomHalf.frame, 0, bottomHalf.bounds.size.height);
-    bottomHalf.frame = newFrame;
-    
-    bottomHalf.userInteractionEnabled = NO;
-    return bottomHalf;
-}
-
 - (void)animateTransition:(id<UIViewControllerContextTransitioning>)transitionContext
 {
     
@@ -103,11 +122,11 @@ CGFloat RadiansToDegrees(CGFloat radians)
     CGFloat w = CGRectGetWidth(sourceSnapshot.frame);
     CGFloat h = CGRectGetHeight(sourceSnapshot.frame) / 2.0f;
     
-    UIView *sourceUpperView = [self createUpperHalf:sourceSnapshot];
-    UIView *sourceBottomView = [self createBottomHalf:sourceSnapshot];
+    UIView *sourceUpperView = [sourceSnapshot topHalf];
+    UIView *sourceBottomView = [sourceSnapshot bottomHalf];
     
-    UIView *destinationUpperView = [self createUpperHalf:destinationSnapshot];
-    UIView *destinationBottomView = [self createBottomHalf:destinationSnapshot];
+    UIView *destinationUpperView = [destinationSnapshot topHalf];
+    UIView *destinationBottomView = [destinationSnapshot bottomHalf];
     
     CGFloat midShadow = 0.2f;
     CGFloat maxShadow = 0.7f;

@@ -25,7 +25,7 @@ AKOFlipViewControllerDatasource>
 
 - (id<AKOFlipViewControllerDatasource>)datasource
 {
-    if (_datasource) return self;
+    if (!_datasource) return self;
     return _datasource;
 }
 
