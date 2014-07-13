@@ -87,7 +87,6 @@ CGFloat RadiansToDegrees(CGFloat radians)
 - (void)animateTransition:(id<UIViewControllerContextTransitioning>)transitionContext
 {
     
-    //遷移元のビューコントローラーとビューを取得
     UIViewController *sourceVC = [transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
     UIViewController *destinationVC = [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
     
@@ -97,10 +96,8 @@ CGFloat RadiansToDegrees(CGFloat radians)
     
     UIView *sourceSnapshot = [sourceView snapshotViewAfterScreenUpdates:NO];
     
-    //アニメーションを実行するためのコンテナビューを取得
     UIView *containerView = [transitionContext containerView];
     
-    //遷移先のスナップショットを取る
     UIView *destinationSnapshot = [destinationView snapshotViewAfterScreenUpdates:YES];
     
     CGFloat w = CGRectGetWidth(sourceSnapshot.frame);
@@ -115,24 +112,16 @@ CGFloat RadiansToDegrees(CGFloat radians)
     CGFloat midShadow = 0.2f;
     CGFloat maxShadow = 0.7f;
     
-    
-    
-    
-    //上下のスナップショットをコンテナに配置
     [containerView addSubview:sourceUpperView];
     [containerView addSubview:sourceBottomView];
     
     
     
     if (self.presenting) {
-        //Pushの動作。上にめくる
+        // PUSH
         
-        
-        
-        //遷移先のビューをスナップショットの下に挿入
         [containerView insertSubview:destinationVC.view belowSubview:sourceUpperView];
         
-        //めくり先の上のビュー
         [containerView addSubview:destinationUpperView];
         [containerView insertSubview:destinationBottomView aboveSubview:destinationVC.view];
         
@@ -158,8 +147,6 @@ CGFloat RadiansToDegrees(CGFloat radians)
                                        delay:0
                                      options:0
                                   animations:^{
-                                      // 1つ目のKey-frame: スライドアニメーション
-                                      //下半分をセッティング
                                       [UIView addKeyframeWithRelativeStartTime:0.0
                                                               relativeDuration:0.5
                                                                     animations:
@@ -170,7 +157,6 @@ CGFloat RadiansToDegrees(CGFloat radians)
                                            [self shadowViewForView:destinationBottomView].alpha = 0;
                                        }];
                                       
-                                      // 2つ目のKey-frame: 回転アニメーション
                                       [UIView addKeyframeWithRelativeStartTime:0.5
                                                               relativeDuration:0.5
                                                                     animations:
@@ -182,27 +168,23 @@ CGFloat RadiansToDegrees(CGFloat radians)
                                        }];
                                   }
                                   completion:^(BOOL finished){
-                                      [sourceBottomView removeFromSuperview];//不要になるため削除する
-                                      [sourceUpperView removeFromSuperview];//遷移元の上半分は不要になるため削除する
+                                      [sourceBottomView removeFromSuperview];
+                                      [sourceUpperView removeFromSuperview];
                                       [destinationUpperView removeFromSuperview];
                                       [destinationBottomView removeFromSuperview];
                                       
-                                      // 画面遷移終了を通知
                                       BOOL completed = ![transitionContext transitionWasCancelled];
                                       [transitionContext completeTransition:completed];
                                   }
          ];
         
     }else{
-        //POPの動作。下にめくる。
+        // POP
         
-        //高さ設定しておく
-        //高さ0にしておく
         [containerView addSubview:destinationBottomView];
         
         [destinationBottomView setFrame:CGRectMake(0, h, w, 0)];
         
-        //遷移先のビューをスナップショットの下に挿入
         [containerView insertSubview:destinationVC.view belowSubview:sourceUpperView];
         [containerView insertSubview:destinationUpperView aboveSubview:destinationVC.view];
         
@@ -219,12 +201,11 @@ CGFloat RadiansToDegrees(CGFloat radians)
         [self shadowViewForView:destinationUpperView].alpha = maxShadow;
         [self shadowViewForView:destinationBottomView].alpha = midShadow;
         
-        //切れ目がないアニメーション
         [UIView animateKeyframesWithDuration:[self transitionDuration:transitionContext]
                                        delay:0
                                      options:0
                                   animations:^{
-                                      // 1つ目のKey-frame: スライドアニメーション
+        
                                       [UIView addKeyframeWithRelativeStartTime:0.0
                                                               relativeDuration:0.5
                                                                     animations:
@@ -235,7 +216,7 @@ CGFloat RadiansToDegrees(CGFloat radians)
                                            [self shadowViewForView:sourceUpperView].alpha = midShadow;
                                        }];
                                       
-                                      // 2つ目のKey-frame: 回転アニメーション
+                                      
                                       [UIView addKeyframeWithRelativeStartTime:0.5
                                                               relativeDuration:0.5
                                                                     animations:
@@ -247,12 +228,11 @@ CGFloat RadiansToDegrees(CGFloat radians)
                                        }];
                                   }
                                   completion:^(BOOL finished){
-                                      [sourceBottomView removeFromSuperview];//遷移元の上半分は不要になるため削除する
-                                      [sourceUpperView removeFromSuperview];//不要になるため削除する
+                                      [sourceBottomView removeFromSuperview];
+                                      [sourceUpperView removeFromSuperview];
                                       [destinationUpperView removeFromSuperview];
                                       [destinationBottomView removeFromSuperview];
                                       
-                                      // 画面遷移終了を通知
                                       BOOL completed = ![transitionContext transitionWasCancelled];
                                       [transitionContext completeTransition:completed];
                                   }
