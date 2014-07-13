@@ -7,8 +7,6 @@
 //
 
 #import "AKOFlipViewController.h"
-#import "AKOFlipTransitionAnimator.h"
-#import "AKOFlipInteractiveTransition.h"
 
 @interface AKOFlipViewController ()
 <UIViewControllerTransitioningDelegate,
@@ -46,6 +44,13 @@ AKOFlipViewControllerDatasource>
         _flipInteractiveTransition.delegate = self;
     }
     return _flipInteractiveTransition;
+}
+
+- (void)setTransitionDirection:(AKOFlipTransitionDirection)transitionDirection
+{
+    _transitionDirection = transitionDirection;
+    self.flipInteractiveTransition.transitionDirection = transitionDirection;
+    self.flipTransitionAnimator.transitionDirection = transitionDirection;
 }
 
 - (void)viewDidLoad

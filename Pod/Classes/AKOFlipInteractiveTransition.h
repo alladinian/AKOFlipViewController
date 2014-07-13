@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AKOFlipTransitionAnimator.h"
 
 @protocol AKOFlipInteractiveTransitionDelegate <NSObject>
 - (void)presentInteractive;
@@ -18,4 +19,5 @@
 @property (nonatomic, weak) id <AKOFlipInteractiveTransitionDelegate> delegate;
 @property (nonatomic, weak) UIView *view;
 @property (nonatomic, assign, getter = isPresenting) BOOL presenting;
+@property (nonatomic, assign) AKOFlipTransitionDirection transitionDirection;
 @end

@@ -29,6 +29,9 @@
 
 - (void)handlePan:(AKOPanGestureRecognizer *)gesture
 {
+    
+    BOOL isVertical = (self.transitionDirection == AKOFlipTransitionDirectionVertical);
+    
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan:
         {
@@ -38,17 +41,17 @@
 //            CGFloat boundary = CGRectGetMidY(self.view.frame);
             CGPoint velocity = [gesture velocityInView:self.view];
             
-            BOOL isDownwards = (velocity.y > 0);
+            BOOL isBackwards = isVertical ? (velocity.y > 0) : (velocity.x > 0);
             
-            if (isDownwards) {
-                //NSLog(@"Downwards...");
+            if (isBackwards) {
+                //NSLog(@"Downwards/Left...");
             } else {
-                //NSLog(@"Upwards...");
+                //NSLog(@"Upwards/Right...");
             }
             
             
             //NSLog(@"Point: %@ | Boundary: %@", NSStringFromCGPoint(nowPoint), @(boundary));
-            self.presenting = !isDownwards;
+            self.presenting = !isBackwards;
             
             if (self.isPresenting) {
                 [self.delegate presentInteractive];
@@ -63,7 +66,7 @@
         {
             CGRect viewRect = self.view.bounds;
             CGPoint translation = [gesture translationInView:self.view];
-            CGFloat percent = translation.y / viewRect.size.height;
+            CGFloat percent = isVertical ? (translation.y / viewRect.size.height) : (translation.x / viewRect.size.width);
             percent = fabsf(percent);
             percent = MIN(1.0, MAX(0.0, percent));
             [self updateInteractiveTransition:percent];
@@ -80,15 +83,15 @@
         case UIGestureRecognizerStateEnded:
         {
             CGPoint nowPoint = [gesture locationInView:self.view];
-            CGFloat boundary = (self.view.frame.origin.y + (self.view.frame.size.height / 2));
+            CGFloat boundary = isVertical ? (self.view.frame.origin.y + (self.view.frame.size.height / 2.0f)) :  (self.view.frame.origin.x + (self.view.frame.size.width / 2.0f));
             if (self.isPresenting){
-                if (boundary > nowPoint.y) {
+                if (isVertical ? (boundary > nowPoint.y) : (boundary > nowPoint.x)) {
                     [self finishInteractiveTransition];
                 } else {
                     [self cancelInteractiveTransition];
                 }
             } else {
-                if (boundary < nowPoint.y) {
+                if (isVertical ? (boundary < nowPoint.y) : (boundary < nowPoint.x)) {
                     [self finishInteractiveTransition];
                     [self.delegate completePopTransition];
                 }else{

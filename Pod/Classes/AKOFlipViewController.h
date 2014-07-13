@@ -7,6 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AKOFlipTransitionAnimator.h"
+#import "AKOFlipInteractiveTransition.h"
 
 @class AKOFlipViewController;
 
@@ -21,4 +23,5 @@
 
 @interface AKOFlipViewController : UIViewController <AKOFlipViewControllerDatasource>
 @property (nonatomic, weak) id <AKOFlipViewControllerDatasource> datasource;
+@property (nonatomic, assign) AKOFlipTransitionDirection transitionDirection;
 @end
