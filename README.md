@@ -1,5 +1,10 @@
 # AKOFlipViewController
 
+[![CI Status](http://img.shields.io/travis/Vasilis Akoinoglou/AKOFlipViewController.svg?style=flat)](https://travis-ci.org/Vasilis Akoinoglou/AKOFlipViewController)
+[![Version](https://img.shields.io/cocoapods/v/AKOFlipViewController.svg?style=flat)](http://cocoadocs.org/docsets/AKOFlipViewController)
+[![License](https://img.shields.io/cocoapods/l/AKOFlipViewController.svg?style=flat)](http://cocoadocs.org/docsets/AKOFlipViewController)
+[![Platform](https://img.shields.io/cocoapods/p/AKOFlipViewController.svg?style=flat)](http://cocoadocs.org/docsets/AKOFlipViewController)
+
 ## Usage
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
