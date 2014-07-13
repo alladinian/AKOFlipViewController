@@ -23,13 +23,10 @@ AKOFlipViewControllerDatasource>
 
 @implementation AKOFlipViewController
 
-- (instancetype)initWithCoder:(NSCoder *)coder
+- (id<AKOFlipViewControllerDatasource>)datasource
 {
-    self = [super initWithCoder:coder];
-    if (self) {
-        _datasource = self;
-    }
-    return self;
+    if (_datasource) return self;
+    return _datasource;
 }
 
 - (AKOFlipTransitionAnimator *)flipTransitionAnimator
@@ -54,8 +51,6 @@ AKOFlipViewControllerDatasource>
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    
     
     UIViewController *initialController = [self.datasource flipViewController:self viewControllerAtIndex:0];
     self.flipInteractiveTransition.view = initialController.view;

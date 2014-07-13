@@ -10,19 +10,16 @@
 Pod::Spec.new do |s|
   s.name             = "AKOFlipViewController"
   s.version          = "0.1.0"
-  s.summary          = "A short description of AKOFlipViewController."
+  s.summary          = "A Flip-Style View Controller"
   s.description      = <<-DESC
-                       An optional longer description of AKOFlipViewController
-
-                       * Markdown format.
-                       * Don't worry about the indent, we strip it!
+                        A Flip-Style View Controller
                        DESC
-  s.homepage         = "https://github.com/<GITHUB_USERNAME>/AKOFlipViewController"
+  s.homepage         = "https://github.com/alladinian/AKOFlipViewController"
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
   s.license          = 'MIT'
   s.author           = { "Vasilis Akoinoglou" => "alladinian@gmail.com" }
-  s.source           = { :git => "https://github.com/<GITHUB_USERNAME>/AKOFlipViewController.git", :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+  s.source           = { :git => "https://github.com/alladinian/AKOFlipViewController.git", :tag => s.version.to_s }
+  s.social_media_url = 'https://twitter.com/alladinian'
 
   s.platform     = :ios, '7.0'
   s.requires_arc = true

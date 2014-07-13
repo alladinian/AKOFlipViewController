@@ -14,7 +14,7 @@
 @required
 - (NSUInteger)numberOfControllersInFlipController:(AKOFlipViewController *)flipController;
 - (UIViewController *)flipViewController:(AKOFlipViewController *)flipViewController
-      viewControllerAtIndex:(NSUInteger)index;
+                   viewControllerAtIndex:(NSUInteger)index;
 @end
 
 #pragma mark -
