@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.version          = "0.1.0"
   s.summary          = "A Flip-Style View Controller"
   s.description      = <<-DESC
-                        A Flip-Style View Controller
+                        A Flip-Style View Controller with 2.5D animations and shadows.
                        DESC
   s.homepage         = "https://github.com/alladinian/AKOFlipViewController"
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
@@ -29,5 +29,4 @@ Pod::Spec.new do |s|
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
 end
