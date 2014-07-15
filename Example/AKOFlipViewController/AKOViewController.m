@@ -27,6 +27,31 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    
+    UISegmentedControl *directionControl = (id)[self.view viewWithTag:1];
+    [self.view bringSubviewToFront:directionControl];
+    
+    [directionControl addTarget:self action:@selector(switchMode:) forControlEvents:UIControlEventValueChanged];
+    
+}
+
+- (void)switchMode:(UISegmentedControl *)sender
+{
+    switch (sender.selectedSegmentIndex) {
+        case 0:
+            self.transitionDirection = AKOFlipTransitionDirectionVertical;
+            break;
+        case 1:
+            self.transitionDirection = AKOFlipTransitionDirectionHorizontal;
+            break;
+        default:
+            break;
+    }
+}
+
 - (NSUInteger)numberOfControllersInFlipController:(AKOFlipViewController *)flipController
 {
     return 5;

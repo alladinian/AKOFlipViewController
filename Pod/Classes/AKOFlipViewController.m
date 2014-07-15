@@ -59,9 +59,10 @@ AKOFlipViewControllerDatasource>
     
     UIViewController *initialController = [self.datasource flipViewController:self viewControllerAtIndex:0];
     self.flipInteractiveTransition.view = initialController.view;
-    self.flipTransitionAnimator.transitionDuration = 0.45f;
+    self.flipTransitionAnimator.transitionDuration = 0.25f;
     
     self.flipNavigationController = [[UINavigationController alloc] initWithRootViewController:initialController];
+    self.flipNavigationController.interactivePopGestureRecognizer.enabled = NO;
     self.flipNavigationController.delegate = self;
     [self.flipNavigationController.navigationBar setHidden:YES];
     

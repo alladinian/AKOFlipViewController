@@ -35,22 +35,22 @@
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan:
         {
-            //NSLog(@"Gesture began...");
+            NSLog(@"Gesture began...");
             
-//            CGPoint nowPoint = [gesture locationInView:self.view];
-//            CGFloat boundary = CGRectGetMidY(self.view.frame);
+            CGPoint nowPoint = [gesture locationInView:self.view];
+            CGFloat boundary = CGRectGetMidY(self.view.frame);
             CGPoint velocity = [gesture velocityInView:self.view];
             
             BOOL isBackwards = isVertical ? (velocity.y > 0) : (velocity.x > 0);
             
             if (isBackwards) {
-                //NSLog(@"Downwards/Left...");
+                NSLog(@"Downwards/Left...");
             } else {
-                //NSLog(@"Upwards/Right...");
+                NSLog(@"Upwards/Right...");
             }
             
             
-            //NSLog(@"Point: %@ | Boundary: %@", NSStringFromCGPoint(nowPoint), @(boundary));
+            NSLog(@"Point: %@ | Boundary: %@", NSStringFromCGPoint(nowPoint), @(boundary));
             self.presenting = !isBackwards;
             
             if (self.isPresenting) {
@@ -59,7 +59,7 @@
                 [self.delegate dismissInteractive];
             }
             
-            //NSLog(@"MODE: %@", self.isPushMode ? @"PUSH" : @"POP");
+            NSLog(@"MODE: %@", self.presenting ? @"PUSH" : @"POP");
             break;
         }
         case UIGestureRecognizerStateChanged:
@@ -71,17 +71,19 @@
             percent = MIN(1.0, MAX(0.0, percent));
             [self updateInteractiveTransition:percent];
             
-            //NSLog(@"Gesture changed...");
-            //NSLog(@"Translation: %@ | Percent: %@", NSStringFromCGPoint(translation), @(percent));
+            NSLog(@"Gesture changed...");
+            NSLog(@"Translation: %@ | Percent: %@", NSStringFromCGPoint(translation), @(percent));
             
             break;
         }
         case UIGestureRecognizerStateCancelled:
         {
+            NSLog(@"Gesture Cancelled...");
             break;
         }
         case UIGestureRecognizerStateEnded:
         {
+            NSLog(@"Gesture Ended...");
             CGPoint nowPoint = [gesture locationInView:self.view];
             CGFloat boundary = isVertical ? (self.view.frame.origin.y + (self.view.frame.size.height / 2.0f)) :  (self.view.frame.origin.x + (self.view.frame.size.width / 2.0f));
             if (self.isPresenting){
