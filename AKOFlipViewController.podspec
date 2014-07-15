@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "AKOFlipViewController"
-  s.version          = "0.1.2"
+  s.version          = "0.1.3"
   s.summary          = "A Flip-Style View Controller"
   s.description      = <<-DESC
                         A Flip-Style View Controller with 2.5D animations and shadows.
